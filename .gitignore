@@ -13,3 +13,13 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+*/mocks/
+
+# Test output directory
+out/
+
+# Binary output directory
+bin/
+
+# Environment file to simplify testing
+.env
