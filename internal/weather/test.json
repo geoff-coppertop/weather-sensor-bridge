@@ -1,0 +1,30 @@
+{
+  "input": {
+    "time": "2021-07-23 03:15:46",
+    "model": "SwitchDoc Labs FT020T AIO",
+    "device": 12,
+    "id": 0,
+    "batterylow": 0,
+    "avewindspeed": 10,
+    "gustwindspeed": 10,
+    "winddirection": 100,
+    "cumulativerain": 3,
+    "temperature": 1089,
+    "humidity": 54,
+    "light": 38,
+    "uv": 10,
+    "mic": "CRC"
+  },
+  "topic": "sensor/rtl_433/SwitchDoc_Labs_FT020T_AIO",
+  "output": {
+    "batterylow": false,
+    "windspeedaverage": 1.0,
+    "windspeedgust": 1.0,
+    "winddirection": 100,
+    "rainaccumulation": 0.3,
+    "temperature": 20.5,
+    "humidity": 54,
+    "sunlight": 38,
+    "uvindex": 1.0
+  }
+}
