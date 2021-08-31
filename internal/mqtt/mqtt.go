@@ -3,11 +3,14 @@ package mqtt
 import (
 	"context"
 	"sync"
-
-	wx "github.com/geoff-coppertop/weather-sensor-bridge/internal/weather"
 )
 
-func Start(ctx context.Context, wg *sync.WaitGroup, in <-chan wx.WeatherData) error {
+type Data struct {
+	Topic string
+	Data  []byte
+}
+
+func Start(ctx context.Context, wg *sync.WaitGroup, in <-chan Data) error {
 	wg.Add(1)
 
 	go func() {
@@ -32,6 +35,14 @@ func Start(ctx context.Context, wg *sync.WaitGroup, in <-chan wx.WeatherData) er
 	return nil
 }
 
-func handleData(data wx.WeatherData) error {
+func SanitizeTopic(topic string) string {
+	return ""
+}
+
+func JoinTopic(topics ...string) string {
+	return ""
+}
+
+func handleData(data Data) error {
 	return nil
 }
