@@ -35,6 +35,8 @@ func Start(ctx context.Context, wg *sync.WaitGroup) <-chan map[string]interface{
 				break
 			}
 
+			log.Debug(line)
+
 			var sensorData map[string]interface{}
 			if err := json.Unmarshal([]byte(line), &sensorData); err != nil {
 				log.Error(err)
