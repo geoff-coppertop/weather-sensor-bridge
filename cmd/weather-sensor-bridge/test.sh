@@ -5,7 +5,7 @@ time="${1:-5}"
 
 while [ true ]
 do
-  echo '{"gh_username":"geoff-coppertop", "gateway_ip":"192.168.1.1", "username":"thomasga", "run_rpi_boot":"false", "os_choice":"RaspiOSLite"}'
+  echo '{"time" : "2021-09-02 12:49:53", "model" : "Test Deivce", "device" : 12, "id" : 0, "batterylow" : 0, "avewindspeed" : 3, "gustwindspeed" : 7, "winddirection" : 340, "cumulativerain" : 54, "temperature" : 808, "humidity" : 86, "light" : 183, "uv" : 0, "mic" : "CRC"}'
   sleep $time
 done
 

@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	cfg "github.com/geoff-coppertop/weather-sensor-bridge/internal/config"
-	"github.com/geoff-coppertop/weather-sensor-bridge/internal/mqtt"
+	pub "github.com/geoff-coppertop/weather-sensor-bridge/internal/publisher"
 	sns "github.com/geoff-coppertop/weather-sensor-bridge/internal/sensor"
 	wx "github.com/geoff-coppertop/weather-sensor-bridge/internal/weather"
 	log "github.com/sirupsen/logrus"
@@ -38,19 +38,21 @@ func main() {
 
 	wxCh := wx.Start(ctx, &wg, snsCh)
 
-	mqtt.Start(ctx, &wg, wxCh)
+	pubCh := pub.Start(ctx, &wg, cfg, wxCh)
 
-	// Messages will be handled through the callback so we really just need to wait until a shutdown
-	// is requested
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt)
-	signal.Notify(sig, syscall.SIGTERM)
+	WaitProcess(&wg, pubCh, cancel)
+}
 
+func WaitProcess(wg *sync.WaitGroup, ch <-chan error, cancel context.CancelFunc) {
 	log.Info("Waiting")
 
-	<-sig
+	select {
+	case <-OSExit():
+		log.Info("signal caught - exiting")
 
-	log.Info("signal caught - exiting")
+	case <-ch:
+		log.Errorf("uh-oh")
+	}
 
 	cancel()
 
@@ -59,4 +61,12 @@ func main() {
 	wg.Wait()
 
 	log.Info("goodbye")
+}
+
+func OSExit() <-chan os.Signal {
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+	signal.Notify(sig, syscall.SIGTERM)
+
+	return sig
 }
