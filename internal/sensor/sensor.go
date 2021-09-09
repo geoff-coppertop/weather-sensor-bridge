@@ -15,7 +15,25 @@ func Start(ctx context.Context, wg *sync.WaitGroup) <-chan map[string]interface{
 
 	wg.Add(1)
 
-	cmd := exec.CommandContext(ctx, "./cmd/weather-sensor-bridge/test.sh", "10")
+	cmd := exec.CommandContext(
+		ctx,
+		"/usr/local/bin/rtl_433",
+		"-q",
+		"-F",
+		"json",
+		"-R",
+		"146",
+		"-R",
+		"147",
+		"-R",
+		"148",
+		"-R",
+		"150",
+		"-R",
+		"151",
+		"-R",
+		"152")
+
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Fatal(err)
