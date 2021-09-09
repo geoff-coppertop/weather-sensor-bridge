@@ -8,6 +8,8 @@ GOBIN=$(GOBASE)/bin
 # Make is verbose in Linux. Make it silent.
 MAKEFLAGS += --silent
 
+PLATFORM?=linux/arm64
+
 # Redirect error output to a file, so we can show it in development mode.
 STDERR=/tmp/weather-sensor-bridge-stderr.txt
 
@@ -43,6 +45,20 @@ build:
 	@-rm $(STDERR)
 	@-$(MAKE) -s compile 2> $(STDERR)
 	@cat $(STDERR) | sed -e '1s/.*/\nError:\n/'  | sed 's/make\[.*/ /' | sed "/^/s/^/     /" 1>&2
+
+## docker-build: Builds the docker image, defaults to linux/amd64 platform can be specified by platform=<platform>.
+docker-build:
+	@echo "  >  Building docker image..."
+	@echo $(CR_PAT) | docker login ghcr.io -u geoff-coppertop --password-stdin
+	@docker buildx build \
+		--platform $(PLATFORM) \
+		-t ghcr.io/geoff-coppertop/weather-sensor-bridge:latest \
+		--push .
+	@docker logout ghcr.io
+
+## docker-build-all: Builds all docker images.
+docker-build-all:
+	@-$(MAKE) -s docker-build PLATFORM=linux/arm64,linux/amd64
 
 .PHONY: help
 all: help
