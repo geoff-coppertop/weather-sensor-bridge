@@ -51,7 +51,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /root
 COPY --from=rtl433-builder /build/root/ /
 
-# COPY --from=go-builder /weather-sensor-bridge/bin/weather-sensor-bridge /
+COPY --from=go-builder /weather-sensor-bridge/bin/weather-sensor-bridge /
 
 # Run
 CMD ["/weather-sensor-bridge"]
