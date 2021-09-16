@@ -48,9 +48,7 @@ RUN apt-get update && apt-get install -y \
     soapysdr-module-all \
  && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /root
 COPY --from=rtl433-builder /build/root/ /
-
 COPY --from=go-builder /weather-sensor-bridge/bin/weather-sensor-bridge /
 
 # Run
