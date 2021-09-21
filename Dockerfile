@@ -46,10 +46,10 @@ RUN apt-get update && apt-get install -y \
     librtlsdr-dev \
     libsoapysdr-dev \
     soapysdr-module-all \
- && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=rtl433-builder /build/root/ /
-COPY --from=go-builder /weather-sensor-bridge/bin/weather-sensor-bridge /
+COPY --from=go-builder /weather-sensor-bridge/out/weather-sensor-bridge /
 
 # Run
 CMD ["/weather-sensor-bridge"]

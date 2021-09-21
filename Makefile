@@ -1,10 +1,5 @@
 include .env
 
-# Go related variables.
-GOBASE=$(shell pwd | sed 's/ /\\ /g')
-GOPATH="$(GOBASE)/vendor:$(GOBASE)"
-GOBIN=$(GOBASE)/bin
-
 # Make is verbose in Linux. Make it silent.
 MAKEFLAGS += --silent
 
@@ -16,28 +11,28 @@ STDERR=/tmp/weather-sensor-bridge-stderr.txt
 ## clean: Clean build files.
 clean:
 	@echo "  >  Cleaning build cache"
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go clean -mod=mod
-	@rm -rf bin
+	@go clean --mod=mod
 	@rm -rf out
+	@rm -rf internal/mocks
 
 deps:
 	@echo "  >  Getting binary dependencies..."
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go mod download
+	@go mod download
 
-## test: Generate and run all unit tests
+## test: Clean and run all unit tests
 test: clean deps
 	@echo "  >  Running tests..."
 	@mkdir -p out
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go test -v -coverprofile=./out/coverage.out -mod=mod ./...
+	@go test -v -coverprofile=./out/coverage.out --mod=mod ./...
 
 ## coverage: Show unit test coverage report
 coverage: test
 	@echo "  >  Parsing coverage..."
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go tool cover -html=./out/coverage.out
+	@go tool cover -html=./out/coverage.out
 
 compile: clean deps test
 	@echo "  >  Building binary..."
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go build -mod=mod -o $(GOBIN)/weather-sensor-bridge $(GOBASE)/cmd/weather-sensor-bridge/main.go
+	@go build --mod=mod -o ./out/weather-sensor-bridge ./cmd/weather-sensor-bridge/main.go
 
 ## build: Compile the binary.
 build:
@@ -47,18 +42,12 @@ build:
 	@cat $(STDERR) | sed -e '1s/.*/\nError:\n/'  | sed 's/make\[.*/ /' | sed "/^/s/^/     /" 1>&2
 
 ## docker-build: Builds the docker image, defaults to linux/amd64 platform can be specified by platform=<platform>.
-docker-build:
+docker-build: clean
 	@echo "  >  Building docker image..."
-	@echo $(CR_PAT) | docker login ghcr.io -u geoff-coppertop --password-stdin
 	@docker buildx build \
 		--platform $(PLATFORM) \
 		-t ghcr.io/geoff-coppertop/weather-sensor-bridge:latest \
-		--push .
-	@docker logout ghcr.io
-
-## docker-build-all: Builds all docker images.
-docker-build-all:
-	@-$(MAKE) -s docker-build PLATFORM=linux/arm64,linux/amd64
+		--load .
 
 .PHONY: help
 all: help
