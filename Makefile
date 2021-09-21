@@ -16,11 +16,16 @@ clean:
 	@rm -rf internal/mocks
 
 deps:
-	@echo "  >  Getting binary dependencies..."
+	@echo "  >  Getting dependencies..."
+	@go install github.com/golang/mock/mockgen@latest
 	@go mod download
 
+generate:
+	@echo "  >  Generate code..."
+	@go generate ./...
+
 ## test: Clean and run all unit tests
-test: clean deps
+test: clean deps generate
 	@echo "  >  Running tests..."
 	@mkdir -p out
 	@go test -v -coverprofile=./out/coverage.out --mod=mod ./...
@@ -30,7 +35,7 @@ coverage: test
 	@echo "  >  Parsing coverage..."
 	@go tool cover -html=./out/coverage.out
 
-compile: clean deps test
+compile: test
 	@echo "  >  Building binary..."
 	@go build --mod=mod -o ./out/weather-sensor-bridge ./cmd/weather-sensor-bridge/main.go
 
