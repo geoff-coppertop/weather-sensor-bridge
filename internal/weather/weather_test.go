@@ -71,6 +71,6 @@ func TestNormalizeDataTestInput(t *testing.T) {
 	}
 
 	if string(input) != string(output) {
-		t.Errorf("unexpected error, output: %v, expected: %v", output, test.Output)
+		t.Errorf("unexpected error, output: %v, expected: %v", string(output), test.Output)
 	}
 }

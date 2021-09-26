@@ -17,14 +17,14 @@
   },
   "topic": "sensor/rtl_433/SwitchDoc_Labs_FT020T_AIO",
   "output": {
-    "batterylow": false,
-    "windspeedaverage": 1.0,
-    "windspeedgust": 1.0,
-    "winddirection": 100,
-    "rainaccumulation": 0.3,
-    "temperature": 20.5,
-    "humidity": 54,
-    "sunlight": 38,
-    "uvindex": 1.0
+    "batt": false,
+    "hum": 54,
+    "light": 38,
+    "rain_acc": 0.3,
+    "temp": 20.5,
+    "uv": 1,
+    "wdir": 100,
+    "wspd": 1,
+    "wspd_gust": 1
   }
 }
