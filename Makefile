@@ -1,12 +1,10 @@
-include .env
-
 # Make is verbose in Linux. Make it silent.
 MAKEFLAGS += --silent
 
-PLATFORM?=linux/arm64
+APP_NAME=weather-sensor-bridge
 
 # Redirect error output to a file, so we can show it in development mode.
-STDERR=/tmp/weather-sensor-bridge-stderr.txt
+STDERR="/tmp/$(APP_NAME)-stderr.txt"
 
 ## clean: Clean build files.
 clean:
@@ -37,7 +35,7 @@ coverage: test
 
 compile: test
 	@echo "  >  Building binary..."
-	@go build --mod=mod -o ./out/weather-sensor-bridge ./cmd/weather-sensor-bridge/main.go
+	@go build --mod=mod -o ./out/$(APP_NAME) ./cmd/$(APP_NAME)/main.go
 
 ## build: Compile the binary.
 build:
@@ -46,19 +44,11 @@ build:
 	@-$(MAKE) -s compile 2> $(STDERR)
 	@cat $(STDERR) | sed -e '1s/.*/\nError:\n/'  | sed 's/make\[.*/ /' | sed "/^/s/^/     /" 1>&2
 
-## docker-build: Builds the docker image, defaults to linux/amd64 platform can be specified by platform=<platform>.
-docker-build: clean
-	@echo "  >  Building docker image..."
-	@docker buildx build \
-		--platform $(PLATFORM) \
-		-t ghcr.io/geoff-coppertop/weather-sensor-bridge:latest \
-		--load .
-
 .PHONY: help
 all: help
 help: Makefile
 	@echo
-	@echo " Choose a command run in weather-sensor-bridge:"
+	@echo " Choose a command run in $(APP_NAME):"
 	@echo
 	@sed -n 's/^##//p' $< | column -t -s ':' |  sed -e 's/^/ /'
 	@echo
