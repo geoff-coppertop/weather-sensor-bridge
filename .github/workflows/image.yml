@@ -27,8 +27,6 @@ jobs:
         with:
           images: |
             ghcr.io/geoff-coppertop/weather-sensor-bridge
-          flavor: |
-            latest=true
           tags: |
             type=raw,value=latest
             type=ref,event=pr
