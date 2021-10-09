@@ -28,7 +28,7 @@ jobs:
           images: |
             ghcr.io/geoff-coppertop/weather-sensor-bridge
           tags: |
-            type=raw,value=latest
+            type=edge,branch=main
             type=ref,event=pr
             type=semver,pattern={{version}}
       - name: Login to GitHub Container Registry
