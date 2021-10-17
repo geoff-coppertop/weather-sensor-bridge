@@ -18,7 +18,7 @@ deps:
 	@go install github.com/golang/mock/mockgen@latest
 	@go mod download
 
-generate:
+generate: deps
 	@echo "  >  Generate code..."
 	@go generate ./...
 

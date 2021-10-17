@@ -7,6 +7,13 @@ import (
 	"time"
 )
 
+type WindowingMethod int
+
+const (
+	ROLLING WindowingMethod = iota
+	CONSECUTIVE
+)
+
 //go:generate mockgen -destination=../mocks/mock_clock.go -package=mocks github.com/geoff-coppertop/weather-sensor-bridge/internal/accumulator Clock
 type Clock interface {
 	Now() time.Time
@@ -21,6 +28,7 @@ type Accumulator struct {
 	values *list.List
 	period time.Duration
 	clock  Clock
+	method WindowingMethod
 }
 
 type Stats struct {
@@ -30,22 +38,54 @@ type Stats struct {
 	Average     float64
 }
 
-func New(period time.Duration, clock Clock) *Accumulator {
+func New(period time.Duration, clock Clock, method WindowingMethod) *Accumulator {
 	acc := Accumulator{
 		values: list.New(),
 		period: period,
 		clock:  clock,
+		method: method,
 	}
 
 	return &acc
 }
 
-func (acc *Accumulator) Accumulate(val float64) (Stats, error) {
-	newVal := timestampedValue{
-		value:     val,
-		timestamp: acc.clock.Now(),
+func (acc *Accumulator) updateConsective(newVal timestampedValue) error {
+	if acc.values.Len() > 0 {
+		val, err := getValue(acc.values.Back())
+		if err != nil {
+			return err
+		}
+
+		/* Start by getting the epoch of the new data and the data at the back
+		 * of the list, which is the second newest. Compare the epochs if they
+		 * are,
+		 *  - the same, add to the list
+		 *  - different, clear the list and then add
+		 * which means all we need to do is check if they're different and clear
+		 * and in both cases we then add to the list. */
+		oldEpoch := acc.calcEpochTime(val.timestamp)
+		newEpoch := acc.calcEpochTime(newVal.timestamp)
+
+		if oldEpoch != newEpoch {
+			acc.values.Init()
+		}
 	}
 
+	acc.values.PushBack(newVal)
+
+	return nil
+}
+
+func (acc *Accumulator) calcEpochTime(timestamp time.Time) int64 {
+	period := int64(acc.period.Seconds())
+	epoch := timestamp.Unix() % period
+
+	epoch = timestamp.Unix() - epoch
+
+	return epoch
+}
+
+func (acc *Accumulator) updateRolling(newVal timestampedValue) error {
 	acc.values.PushBack(newVal)
 
 	/* Pop elements off of the front of the list until the list only goes back
@@ -53,7 +93,7 @@ func (acc *Accumulator) Accumulate(val float64) (Stats, error) {
 	for {
 		val, err := getValue(acc.values.Front())
 		if err != nil {
-			break
+			return err
 		}
 
 		if val.timestamp.Before(newVal.timestamp.Add(-acc.period)) {
@@ -63,6 +103,10 @@ func (acc *Accumulator) Accumulate(val float64) (Stats, error) {
 		}
 	}
 
+	return nil
+}
+
+func (acc *Accumulator) calculateStats() (Stats, error) {
 	stat := Stats{
 		Minimum:     math.MaxFloat64,
 		Maximum:     -math.MaxFloat64,
@@ -105,6 +149,23 @@ func (acc *Accumulator) Accumulate(val float64) (Stats, error) {
 	stat.PeriodDelta = end.value - start.value
 
 	return stat, nil
+}
+
+func (acc *Accumulator) Accumulate(val float64) (Stats, error) {
+	newVal := timestampedValue{
+		value:     val,
+		timestamp: acc.clock.Now(),
+	}
+
+	switch acc.method {
+	case ROLLING:
+		acc.updateRolling(newVal)
+
+	case CONSECUTIVE:
+		acc.updateConsective(newVal)
+	}
+
+	return acc.calculateStats()
 }
 
 func getValue(e *list.Element) (timestampedValue, error) {
