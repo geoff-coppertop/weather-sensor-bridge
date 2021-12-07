@@ -49,10 +49,12 @@ func Start(ctx context.Context, wg *sync.WaitGroup, in <-chan map[string]interfa
 	wg.Add(1)
 
 	synthMap := map[string][]synthesizer{
-		"wspd_2m":   {synthesizer{"wspd", acc.New(2*time.Minute, realClock{}, acc.ROLLING), getAverage}},
-		"rain_1hr":  {synthesizer{"rain_acc", acc.New(1*time.Hour, realClock{}, acc.ROLLING), getPeriodDelta}},
-		"rain_24hr": {synthesizer{"rain_acc", acc.New(24*time.Hour, realClock{}, acc.CONSECUTIVE), getPeriodDelta}},
-		"wdir_2m":   {synthesizer{"wdir", acc.New(2*time.Minute, realClock{}, acc.ROLLING), getAverage}},
+		"wspd": {synthesizer{"wspd_2m", acc.New(2*time.Minute, realClock{}, acc.ROLLING), getAverage}},
+		"rain_acc": {
+			synthesizer{"rain_1hr", acc.New(1*time.Hour, realClock{}, acc.ROLLING), getPeriodDelta},
+			synthesizer{"rain_24hr", acc.New(24*time.Hour, realClock{}, acc.CONSECUTIVE), getPeriodDelta},
+		},
+		"wdir": {synthesizer{"wdir", acc.New(2*time.Minute, realClock{}, acc.ROLLING), getAverage}},
 	}
 
 	go func() {
