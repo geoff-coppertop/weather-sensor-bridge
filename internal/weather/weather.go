@@ -221,13 +221,13 @@ func synthesizeData(synthMap map[string][]synthesizer, data map[string]interface
 	hValue, hOk := mh.GetFloatValue(data, "hum")
 	tValue, tOk := mh.GetFloatValue(data, "temp")
 	if tOk && hOk {
-		data["dewpoint"] = tValue - ((100.0 - hValue) / 5.0)
+		data["dewpoint"] = math.Round(tValue-((100.0-hValue)/5.0), 2)
 	}
 
 	/* Solar radiation is a function of incident light, it's a little bit black magic
 	 * https://help.ambientweather.net/help/why-is-the-lux-to-w-m-2-conversion-factor-126-7 */
 	if sValue, sOk := mh.GetFloatValue(data, "light"); sOk {
-		data["solar"] = sValue / 126.7
+		data["solar"] = math.Round(sValue/126.7, 2)
 	}
 
 	if wValue, wOk := mh.GetFloatValue(data, "wdir"); wOk {
@@ -255,7 +255,7 @@ func synthesizeData(synthMap map[string][]synthesizer, data map[string]interface
 
 			log.Debugf("%s: %.2f", synth.outKey, outValue)
 
-			data[synth.outKey] = outValue
+			data[synth.outKey] = math.Round(outValue, 2)
 		}
 	}
 
